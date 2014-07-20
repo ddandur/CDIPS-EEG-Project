@@ -1,0 +1,120 @@
+Dog_1/:
+	 Frequency: 399.609756098
+	Interictal files: 418
+	Test files: 3181
+	Ictal files: 178 (5 seizures)
+		0001 - 0031: 31 seconds
+		0032 - 0066: 35 seconds
+		0067 - 0099: 33 seconds
+		0100 - 0140: 41 seconds
+		0141 - 0178: 38 seconds
+
+Dog_2/:
+	 Frequency: 399.609756098
+	Interictal files: 1148
+	Test files: 2997
+	Ictal files: 172 (3 seizures)
+		0001 - 0053: 53 seconds
+		0054 - 0105: 52 seconds
+		0106 - 0172: 67 seconds
+
+Dog_3/:
+	 Frequency: 399.609756098
+	Interictal files: 4760
+	Test files: 4450
+	Ictal files: 480 (12 seizures)
+		0001 - 0040: 40 seconds
+		0041 - 0080: 40 seconds
+		0081 - 0120: 40 seconds
+		0121 - 0160: 40 seconds
+		0161 - 0200: 40 seconds
+		0201 - 0240: 40 seconds
+		0241 - 0280: 40 seconds
+		0281 - 0320: 40 seconds
+		0321 - 0360: 40 seconds
+		0361 - 0400: 40 seconds
+		0401 - 0440: 40 seconds
+		0441 - 0480: 40 seconds
+
+Dog_4/:
+	 Frequency: 399.609756098
+	Interictal files: 2790
+	Test files: 3013
+	Ictal files: 257 (2 seizures)
+		0001 - 0109: 109 seconds
+		0110 - 0257: 148 seconds
+
+Patient_1/:
+	 Frequency: 499.906994
+	Interictal files: 104
+	Test files: 2050
+	Ictal files: 70 (2 seizures)
+		0001 - 0039: 39 seconds
+		0040 - 0070: 31 seconds
+
+Patient_2/:
+	 Frequency: 5000.0
+	Interictal files: 2990
+	Test files: 3894
+	Ictal files: 151 (3 seizures)
+		0001 - 0050: 50 seconds
+		0051 - 0092: 42 seconds
+		0093 - 0151: 59 seconds
+
+Patient_3/:
+	 Frequency: 5000.0
+	Interictal files: 714
+	Test files: 1281
+	Ictal files: 327 (7 seizures)
+		0001 - 0039: 39 seconds
+		0040 - 0096: 57 seconds
+		0097 - 0135: 39 seconds
+		0136 - 0173: 38 seconds
+		0174 - 0232: 59 seconds
+		0233 - 0258: 26 seconds
+		0259 - 0327: 69 seconds
+
+Patient_4/:
+	 Frequency: 5000.0
+	Interictal files: 190
+	Test files: 543
+	Ictal files: 20 (2 seizures)
+		0001 - 0010: 10 seconds
+		0011 - 0020: 10 seconds
+
+Patient_5/:
+	 Frequency: 5000.0
+	Interictal files: 2610
+	Test files: 2986
+	Ictal files: 135 (3 seizures)
+		0001 - 0045: 45 seconds
+		0046 - 0090: 45 seconds
+		0091 - 0135: 45 seconds
+
+Patient_6/:
+	 Frequency: 5000.0
+	Interictal files: 2772
+	Test files: 2997
+	Ictal files: 225 (4 seizures)
+		0001 - 0060: 60 seconds
+		0061 - 0115: 55 seconds
+		0116 - 0170: 55 seconds
+		0171 - 0225: 55 seconds
+
+Patient_7/:
+	 Frequency: 5000.0
+	Interictal files: 3239
+	Test files: 3601
+	Ictal files: 282 (3 seizures)
+		0001 - 0120: 120 seconds
+		0121 - 0240: 120 seconds
+		0241 - 0282: 42 seconds
+
+Patient_8/:
+	 Frequency: 5000.0
+	Interictal files: 1710
+	Test files: 1922
+	Ictal files: 180 (2 seizures)
+		0001 - 0090: 90 seconds
+		0091 - 0180: 90 seconds
+

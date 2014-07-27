@@ -58,7 +58,10 @@ featurelabels = np.array(['species', 'meanCorr', 'mean', 'varVar', 'meanVar'])
 def getFeatures(dataPoint):
 	adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
 	corr = getCorr(temp)
-	adddata.append(corr.values[np.triu_indices_from(corr.values,1)].mean())
+	corr = corr.values[np.triu_indices_from(corr.values,1)]
+	corr = corr[np.where(np.logical_not(np.isnan(corr)))] # Skips over any nan values.
+	adddata.append(corr.mean())
+	#adddata.append(corr.values[np.triu_indices_from(corr.values,1)].mean())
 	adddata.append(temp[2].mean().mean())
 	adddata.append(temp[2].var().var())
 	adddata.append(temp[2].var().mean())
@@ -254,8 +257,8 @@ statuslog.write('Feature generation for test set finished in ' + str(datetime.no
 predictions = []
 testseizureprob = []
 testearlyprob = []
-testseizureprob = clf1.predict_proba(testdf[featurelabels])
-testearlyprob = clf2.predict_proba(testdf[featurelabels])
+testseizureprob = clf1.predict_proba(testdf[featurelabels].values)
+testearlyprob = clf2.predict_proba(testdf[featurelabels].values)
 
 # Merge the predictions together into a single list.
 predictions = zip(testdf.index, testseizureprob, testearlyprob)

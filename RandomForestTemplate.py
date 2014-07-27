@@ -20,7 +20,7 @@ date = str(startrun)[0:10]
 # Set the directory where you desire to have the output
 # and log files stored.
 ### Set the output directory.
-OUTPUTdir = '../' + date + '_RFattempt1/'
+OUTPUTdir = '../' + date + 'Tweaking/'
 call('mkdir ' + OUTPUTdir, shell=True)
 statuslog = open(OUTPUTdir + 'RFLog.txt', 'a')
 statuslog.write(date + '\nFirst attempt at random forest classification.\n\n')
@@ -58,7 +58,7 @@ featurelabels = np.array(['species', 'meanCorr', 'mean', 'varVar', 'meanVar'])
 def getFeatures(dataPoint):
 	adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
 	corr = getCorr(temp)
-	adddata.append(corr.mean().mean())
+	adddata.append(corr.values[np.triu_indices_from(corr.values,1)].mean())
 	adddata.append(temp[2].mean().mean())
 	adddata.append(temp[2].var().var())
 	adddata.append(temp[2].var().mean())
@@ -192,6 +192,7 @@ acc1 = clf1.score(valdf[featurelabels], valdf['seizure'])
 acc2 = clf2.score(valdf[featurelabels], valdf['early'])
 
 # Log the accuracies.
+print 'Accuracy for identification of seizure was ' + str(acc1)[0:6] + '\nAccuracy for identification of early onset was ' + str(acc2)[0:6]
 statuslog.write('Accuracy for identification of seizure was ' + str(acc1)[0:6] + ' and accuracy for identification of early onset was ' + str(acc2)[0:6] + '.\n\n')
 
 # Next calculate the ROC values. Log those values, and save the plots.
@@ -214,6 +215,7 @@ plt.cla()
 seizureAUC = auc(valsfpr, valstpr)
 earlyAUC = auc(valefpr, valetpr)
 
+print 'Seizure AUC = ' + str(seizureAUC) + '\nEarly AUC = ' + str(earlyAUC)
 statuslog.write('Seizure AUC = ' + str(seizureAUC) + '\nEarly AUC = ' + str(earlyAUC) + '\n\n')
 
 print 'Generating features for test set...'

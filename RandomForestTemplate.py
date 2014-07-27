@@ -9,6 +9,7 @@ from random import sample
 from subprocess import call
 from sklearn.externals import joblib
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_curve, auc
 import numpy as np
 
 # For logging info about run, make subdirectory and
@@ -53,6 +54,17 @@ columnlabels = ['species', 'seizure', 'early', 'electrodeNum', 'meanCorr', 'mean
 ### Put the names of the features you'll be using to train here!
 featurelabels = np.array(['species', 'meanCorr', 'mean', 'varVar', 'meanVar'])
 
+### Edit this function to suit the features you want to extract from each clip.
+def getFeatures(dataPoint):
+	adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
+	corr = getCorr(temp)
+	adddata.append(corr.mean().mean())
+	adddata.append(temp[2].mean().mean())
+	adddata.append(temp[2].var().var())
+	adddata.append(temp[2].var().mean())
+	return adddata
+
+# Dictionary for storing all processed clip information for dataframe creation.
 dictdata = {}
 
 # Gather the training data and convert to features.
@@ -64,33 +76,22 @@ for subject in subjectnames:
 	interfiles = filelist[0]
 	ictfiles = filelist[1]
 	
-	### These two for loops should be modified to get the
-	### features desired.
 	# For each interictal sample, extract the features.
 	for sample in interfiles:
 		temp = getDataPoint(sample)
-		adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
-		corr = getCorr(temp)
-		adddata.append(corr.mean().mean())
-		adddata.append(temp[2].mean().mean())
-		adddata.append(temp[2].var().var())
-		adddata.append(temp[2].var().mean())
-		dictdata[sample] = adddata
+		features = getFeatures(temp)
+		dictdata[sample] = features
+
 	# For each ictal sample, extract the features.
 	for sample in ictfiles:
 		temp = getDataPoint(sample)
-		adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
-		corr = getCorr(temp)
-		adddata.append(corr.mean().mean())
-		adddata.append(temp[2].mean().mean())
-		adddata.append(temp[2].var().var())
-		adddata.append(temp[2].var().mean())
-		dictdata[sample] = adddata
+		features = getFeatures(temp)
+		dictdata[sample] = features
 
 # Use the extracted features to construct a pan-subject dataframe.
 traindf = pd.DataFrame.from_dict(dictdata, orient='index')
 traindf.columns = columnlabels
-traindf.to_csv(OUTPUTDIR + 'IncludedDF.csv')
+traindf.to_csv(OUTPUTdir + 'IncludedDF.csv')
 del dictdata
 
 statuslog.write('Feature generation finished in ' + str(datetime.now()-startrun) + '.\nProceeding to training...\n\n')
@@ -165,32 +166,22 @@ for subject in excluded:
 	interfiles = filelist[0]
 	ictfiles = filelist[1]
 	
-	### Make sure you extract the same features as for the training!
 	# For each interictal sample, extract the features.
 	for sample in interfiles:
 		temp = getDataPoint(sample)
-		adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
-		corr = getCorr(temp)
-		adddata.append(corr.mean().mean())
-		adddata.append(temp[2].mean().mean())
-		adddata.append(temp[2].var().var())
-		adddata.append(temp[2].var().mean())
-		dictdata[sample] = adddata
+		features = getFeatures(temp)
+		dictdata[sample] = features
+
 	# For each ictal sample, extract the features.
 	for sample in ictfiles:
 		temp = getDataPoint(sample)
-		adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
-		corr = getCorr(temp)
-		adddata.append(corr.mean().mean())
-		adddata.append(temp[2].mean().mean())
-		adddata.append(temp[2].var().var())
-		adddata.append(temp[2].var().mean())
-		dictdata[sample] = adddata
+		features = getFeatures(temp)
+		dictdata[sample] = features
 
 # Use the extracted features to construct a pan-subject dataframe.
 valdf = pd.DataFrame.from_dict(dictdata, orient='index')
 valdf.columns = columnlabels
-valdf.to_csv(OUTPUTDIR + '_RFattempt/ExcludedDF.csv')
+valdf.to_csv(OUTPUTdir + 'ExcludedDF.csv')
 del dictdata
 
 # Log the progress.
@@ -202,6 +193,28 @@ acc2 = clf2.score(valdf[featurelabels], valdf['early'])
 
 # Log the accuracies.
 statuslog.write('Accuracy for identification of seizure was ' + str(acc1)[0:6] + ' and accuracy for identification of early onset was ' + str(acc2)[0:6] + '.\n\n')
+
+# Next calculate the ROC values. Log those values, and save the plots.
+# First, we need to make predictions over the validation set with the classifiers.
+valseizureprob = clf1.predict_proba(valdf[featurelabels])
+valearlyprob = clf2.predict_proba(valdf[featurelabels])
+# Then, we need to plug them into the ROC curve calculation.
+valsfpr, valstpr, _ = roc_curve(valdf['seizure'], valseizureprob[:,1])
+valefpr, valetpr, _ = roc_curve(valdf['early'], valearlyprob[:,1])
+
+plt.plot(valsfpr, valstpr)
+plt.savefig(OUTPUTdir + 'seizureROC.png')
+plt.clf()
+plt.cla()
+plt.plot(valefpr, valetpr)
+plt.savefig(OUTPUTdir + 'earlyROC.png')
+plt.clf()
+plt.cla()
+
+seizureAUC = auc(valsfpr, valstpr)
+earlyAUC = auc(valefpr, valetpr)
+
+statuslog.write('Seizure AUC = ' + str(seizureAUC) + '\nEarly AUC = ' + str(earlyAUC) + '\n\n')
 
 print 'Generating features for test set...'
 
@@ -223,13 +236,8 @@ for subject in subjectnames:
 	# For each interictal sample, extract the features.
 	for sample in testfiles:
 		temp = getDataPoint(sample)
-		adddata = [1 if 'Dog_' in sample else 0, '', '', len(temp[2])]
-		corr = getCorr(temp)
-		adddata.append(corr.mean().mean())
-		adddata.append(temp[2].mean().mean())
-		adddata.append(temp[2].var().var())
-		adddata.append(temp[2].var().mean())
-		dictdata[sample] = adddata
+		features = getFeatures(temp)
+		dictdata[sample] = features
 
 # Use the extracted features to construct a pan-subject dataframe.
 testdf = pd.DataFrame.from_dict(dictdata, orient='index')

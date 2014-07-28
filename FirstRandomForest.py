@@ -5,7 +5,7 @@
 # Import requisite modules.
 from utilitiesSKM import *
 from datetime import datetime
-from random import sample
+from random import sa mple
 from subprocess import call
 from sklearn.externals import joblib
 from sklearn.ensemble import RandomForestClassifier

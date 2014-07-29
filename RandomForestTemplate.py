@@ -20,7 +20,7 @@ date = str(startrun)[0:10]
 # Set the directory where you desire to have the output
 # and log files stored.
 ### Set the output directory.
-OUTPUTdir = '../' + date + 'Tweaking/'
+OUTPUTdir = '../' + date + 'Tweaking2/'
 call('mkdir ' + OUTPUTdir, shell=True)
 statuslog = open(OUTPUTdir + 'RFLog.txt', 'a')
 statuslog.write(date + '\nFirst attempt at random forest classification.\n\n')
@@ -32,8 +32,7 @@ subjectnames = subjectnames.rstrip().split('\n')
 ### This section determines the training and validation set.
 ### Modify as per your liking.
 # Remove a random set of 3 subjects to validate later.
-# exclude = list(reversed(sorted(sample(range(12), 3))))
-exclude = [11, 5, 0]
+exclude = list(reversed(sorted(sample(range(12), 3))))
 excluded = []
 for x in exclude:
 	excluded.append(subjectnames.pop(x))
@@ -55,7 +54,7 @@ columnlabels = ['species', 'seizure', 'early', 'electrodeNum', 'meanCorr', 'mean
 featurelabels = np.array(['species', 'meanCorr', 'mean', 'varVar', 'meanVar'])
 
 ### Edit this function to suit the features you want to extract from each clip.
-def getFeatures(dataPoint):
+def getFeatures(sample, dataPoint):
 	adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
 	corr = getCorr(temp)
 	corr = corr.values[np.triu_indices_from(corr.values,1)]
@@ -82,13 +81,13 @@ for subject in subjectnames:
 	# For each interictal sample, extract the features.
 	for sample in interfiles:
 		temp = getDataPoint(sample)
-		features = getFeatures(temp)
+		features = getFeatures(sample, temp)
 		dictdata[sample] = features
 
 	# For each ictal sample, extract the features.
 	for sample in ictfiles:
 		temp = getDataPoint(sample)
-		features = getFeatures(temp)
+		features = getFeatures(sample, temp)
 		dictdata[sample] = features
 
 # Use the extracted features to construct a pan-subject dataframe.
@@ -102,7 +101,7 @@ trainingstart = datetime.now()
 
 ### If you want to try a different ML algorithm, change this part!
 # Train random forest classifier for predicting if seizure or not.
-clf1 = RandomForestClassifier()
+clf1 = RandomForestClassifier(n_estimators=100)
 clf1.fit(traindf[featurelabels], traindf['seizure'])
 
 # Save the classifier. Use joblib.load() when desired to retrieve.
@@ -113,7 +112,7 @@ statuslog.write('Generated RFseizure:\n' + str(clf1) + '\n\n')
 
 ### If you want to try a different ML algorithm, change this part!
 # Train random forest classifier for predicting if early or not.
-clf2 = RandomForestClassifier()
+clf2 = RandomForestClassifier(n_estimators=100)
 clf2.fit(traindf[featurelabels], traindf['early'])
 
 # Save the classifier. Use joblib.load() when desired to retrieve.
@@ -172,13 +171,13 @@ for subject in excluded:
 	# For each interictal sample, extract the features.
 	for sample in interfiles:
 		temp = getDataPoint(sample)
-		features = getFeatures(temp)
+		features = getFeatures(sample, temp)
 		dictdata[sample] = features
 
 	# For each ictal sample, extract the features.
 	for sample in ictfiles:
 		temp = getDataPoint(sample)
-		features = getFeatures(temp)
+		features = getFeatures(sample, temp)
 		dictdata[sample] = features
 
 # Use the extracted features to construct a pan-subject dataframe.
@@ -241,7 +240,7 @@ for subject in subjectnames:
 	# For each interictal sample, extract the features.
 	for sample in testfiles:
 		temp = getDataPoint(sample)
-		features = getFeatures(temp)
+		features = getFeatures(sample, temp)
 		dictdata[sample] = features
 
 # Use the extracted features to construct a pan-subject dataframe.
@@ -264,6 +263,18 @@ testearlyprob = clf2.predict_proba(testdf[featurelabels].values)
 predictions = zip(testdf.index, testseizureprob, testearlyprob)
 for x in range(len(predictions)):
     predictions[x] = [predictions[x][0], predictions[x][1][1], predictions[x][2][1]]
+
+# Get rid of the directory and convert the numeric identifier back
+# from the 4 digit format we originally converted it to.
+findnameRE = re.compile('.+/(.+\.mat)')
+findnumRE = re.compile('segment_(\d{4})')
+subnumRE = re.compile('segment_\d{4}')
+for x in range(len(predictions)):
+	tempname = re.search(findnameRE, predictions[x][0]).group(1)
+	oldnum = re.search(findnumRE, predictions[x][0]).group(1)
+	newnum = 'segment_' + str(int(oldnum))
+	newname = re.sub(subnumRE, newnum, tempname)
+	predictions[x][0] = newname
 
 # Output the merged predictions into a csv for submission.
 fileout = open(OUTPUTdir + 'Predictions.csv', 'a')

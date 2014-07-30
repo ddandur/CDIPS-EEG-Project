@@ -8,18 +8,25 @@ subjectnames = subjectnames.rstrip().split('\n')
 
 # Generate the empty feature DataFrame. 
 ### Put the column lables you'll need here!
-columnlabels = ['species', 'seizure', 'early', 'electrodeNum', 'meanCorr', 'mean', 'varVar', 'meanVar']
+columnlabels = ['species', 'seizure', 'early', 'electrodeNum', 'meanCorr', 'mean', 'varVar', 'meanVar', 'delta', 'theta', 'alpha', 'beta', 'lowGamma', 'highGamma']
 
 ### Edit this function to suit the features you want to extract from each clip.
 def getFeatures(sample, dataPoint):
-	adddata = [1 if 'Dog_' in sample else 0, temp[0], temp[1], len(temp[2])]
-	corr = getCorr(temp)
+	adddata = [1 if 'Dog_' in sample else 0, dataPoint[0], dataPoint[1], len(dataPoint[2].T)]
+	corr = getCorr(dataPoint)
 	corr = corr.values[np.triu_indices_from(corr.values,1)]
 	corr = corr[np.where(np.logical_not(np.isnan(corr)))] # Skips over any nan values.
 	adddata.append(corr.mean())
-	adddata.append(temp[2].mean().mean())
-	adddata.append(temp[2].var().var())
-	adddata.append(temp[2].var().mean())
+	adddata.append(dataPoint[2].mean().mean())
+	adddata.append(dataPoint[2].var().var())
+	adddata.append(dataPoint[2].var().mean())
+	powerspec = power(dataPoint)
+	adddata.append(np.sum(powerspec[0:4]))
+	adddata.append(np.sum(powerspec[4:8]))
+	adddata.append(np.sum(powerspec[8:12]))
+	adddata.append(np.sum(powerspec[12:30]))
+	adddata.append(np.sum(powerspec[30:70]))
+	adddata.append(np.sum(powerspec[70:180]))
 	return adddata
 
 # Dictionary for storing all processed clip information for dataframe creation.

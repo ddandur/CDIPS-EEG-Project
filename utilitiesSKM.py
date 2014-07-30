@@ -9,6 +9,40 @@ import scipy.io as io
 from subprocess import check_output
 from sys import exit
 import matplotlib.pyplot as plt
+import numpy as np
+
+# Power Function: As a first pass, each power function calculates the power spectrum 
+# for all electrodes, averages the spectrum across electrodes, 
+# and finally bins the data into the selected frequency range.. This way the output 
+# from each power function call is still a single real value. 
+ 
+# The lowest sampling frequency is 400 Hz, which means the highest frequency 
+# we should ask about should be 200 Hz. Thus lower_hz should be zero or above 
+# and upper_hz should be 200 and below, with lower_hz < upperhz. 
+# The input variables lower_hz and upper_hz should be integers.
+
+# Calculate the real fast fourier transform on each electrode; 
+# the way it's done here is to take modulus of each positive 
+# complex frequency. The result pwr_array is still an array, a list with 
+# num_el values where each element is the corresponding electrode's 
+# values for the FFT squared, each value corresponding to power 
+# at frequency 0 Hz, 1 Hz, etc up to the Nyquist frequency 
+
+# Now average the power across all the electrodes; 
+# ave_pwr is a single array of average power values at each frequency 
+# among the electrodes 
+
+# Now pick out the power values from the desired frequency range 
+# and sum them. A nice feature for us is that the list index of the elements 
+# in the ave_pwr list is also the frequency corresponding to that element in the list. 
+
+def power(dataPoint):   
+	num_el = len(dataPoint[2].T)
+	freq_array = abs(np.fft.rfft(dataPoint[2]))
+	pwr_array = freq_array**2
+	sum_pwr = np.sum(pwr_array, axis = 1)
+	ave_pwr = sum_pwr / float(num_el)
+	return ave_pwr
 
 # Specify a target subject (e.g. 'Dog_1') and, optionally, whether you
 # want 'all' the data, 'train'ing data (ictal and interictal), or

@@ -13,3 +13,41 @@ Use DB for faster pipeline, use all data to train.
 2014-07-30
 Use DB for faster pipeline, use all data to train.
 
+2014-07-30
+Use DB for faster pipeline, use all data to train.
+
+
+Starting analysis...
+Feature generation finished in 0:03:55.525024.
+Proceeding to training...
+
+Generated RFseizure:
+RandomForestClassifier(bootstrap=True, compute_importances=None,
+            criterion=gini, max_depth=None, max_features=auto,
+            min_density=None, min_samples_leaf=1, min_samples_split=2,
+            n_estimators=100, n_jobs=1, oob_score=False, random_state=None,
+            verbose=0)
+
+Generated RFearly:
+RandomForestClassifier(bootstrap=True, compute_importances=None,
+            criterion=gini, max_depth=None, max_features=auto,
+            min_density=None, min_samples_leaf=1, min_samples_split=2,
+            n_estimators=100, n_jobs=1, oob_score=False, random_state=None,
+            verbose=0)
+
+Analysis and training completed in 0:04:21.615195.
+The classifiers have been exported to ../2014-07-30DB1AllTrain/RFClassifierseizure.pkl and ../2014-07-30DB1AllTrain/RFClassifierEarly.pkl via joblib. Use joblib.load() targeted at the parent .pkl file to recall it!
+
+Now moving on to test against excluded subjects...
+
+Feature generation for validation set finished in 0:00:00.000026.
+Proceeding to validation...
+
+Accuracy for identification of seizure was 0.9231 and accuracy for identification of early onset was 0.9732.
+
+Seizure AUC = 0.865441041908
+Early AUC = 0.779150941962
+
+Proceeding to generate predictions...
+
+Total run time finished in 0:04:57.391338.

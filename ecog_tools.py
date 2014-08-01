@@ -69,7 +69,7 @@ def power(filename, lower_hz, upper_hz):
 # ave_pwr is a single array of average power values at each frequency 
 # among the electrodes 
     sum_pwr = np.sum(pwr_array, axis = 0)
-    ave_pwr = np.sum/float(num_el)
+    ave_pwr = sum_pwr/float(num_el)
     
 # Now pick out the power values from the desired frequency range 
 # and sum them. A nice feature for us is that the list index of the elements 

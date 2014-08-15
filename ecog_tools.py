@@ -3,6 +3,7 @@ import scipy
 import scipy.io
 import numpy as np
 import pandas as pd
+import scipy.stats
 
 #intended to transform data into a usable format to train on
 #input: a list of functions and a list of data
@@ -78,6 +79,21 @@ def var(filename):
         output_list.append(['var_%i'%(i),var_values[i]])
     return output_list
 
+# Variation of windowed var
+def var_of_windowed_var(filename):
+    ecog_rec = pd.DataFrame(scipy.io.loadmat(filename)['data'])
+    output_list = []
+    for i in range(len(ecog_rec)):
+        s = np.array(ecog_rec.T[i])
+        width = len(s)/10
+        deltat = len(s)/50
+        temp = []
+        for j in range((len(s)-width)/deltat):
+            var = np.sqrt(s[j*deltat : width + (j+1)*deltat].var())        
+            temp.append(var)
+        output_list.append(['var_of_windowed_var_%i'%(i),np.array(temp).var()])
+    return output_list
+
 def corr(filename):
     sample = scipy.io.loadmat(filename)
     ecog_rec = pd.DataFrame(sample['data'])
@@ -91,9 +107,6 @@ def corr(filename):
                 corr_matrix[i,j] = np.nan
             output_list.append(['corr_%i_%i'%(i,j),corr_matrix[i,j]])
     return output_list
-
-
-
 
 def power(filename, lower_hz, upper_hz):
     sample = scipy.io.loadmat(filename)
@@ -121,7 +134,6 @@ def power(filename, lower_hz, upper_hz):
     selected_part_of_list = ave_pwr[int(lower_hz):int(upper_hz + 1)]
     return np.sum(selected_part_of_list)
 
-
 def deltapower(filename):
     return [[deltapower.__name__,power(filename,0.1,4)]]
 def thetapower(filename):
@@ -135,6 +147,57 @@ def lgammapower(filename):
 def hgammapower(filename):
     return [[hgammapower.__name__,power(filename,70,180)]]
 
+def powerspec (filename):
+    sample = scipy.io.loadmat(filename)
+    #   num_el = number of electrodes
+    num_el = len(sample['data'])
+    
+    # Calculate the real fast fourier transform on each electrode;
+    # the way it's done here is to take modulus of each positive
+    # complex frequency. The result pwr_array is still an array, a list with
+    # num_el values where each element is the corresponding electrode's
+    # values for the FFT squared, each value corresponding to power
+    # at frequency 0 Hz, 1 Hz, etc up to the Nyquist frequency
+    freq_array = abs(np.fft.rfft(sample['data']))
+    pwr_array = freq_array**2
+    
+    # Now average the power across all the electrodes;
+    # ave_pwr is a single array of average power values at each frequency
+    # among the electrodes
+    sum_pwr = np.sum(pwr_array, axis = 0)
+    ave_pwr = sum_pwr/float(num_el)
+    return ave_pwr
+
+def deltapowervar(filename):
+    return [[deltapowervar.__name__,powerspec(filename)[0.1:4].var()]]
+def thetapowervar(filename):
+    return [[thetapowervar.__name__,powerspec(filename)[4:8].var()]]
+def alphapowervar(filename):
+    return [[alphapowervar.__name__,powerspec(filename)[8:12].var()]]
+def betapowervar(filename):
+    return [[betapowervar.__name__,powerspec(filename)[12:30].var()]]
+def lgammapowervar(filename):
+    return [[lgammapowervar.__name__,powerspec(filename)[30:70].var()]]
+def hgammapowervar(filename):
+    return [[hgammapowervar.__name__,powerspec(filename)[70:180].var()]]
+
+# Get the kurtosis of the raw data over the 1 second clip.
+def rawkurtosis(filename):
+    temp = scipy.io.loadmat(filename)
+    data = temp['data']
+    data = pd.DataFrame(data)
+    data = data.sum()
+    kurtval = scipy.stats.kurtosis(data)
+    return [[rawkurtosis.__name__, kurtval]]
+    
+# Get the skew of the raw data over the 1 second clip.
+def rawskew(filename):
+    temp = scipy.io.loadmat(filename)
+    data = temp['data']
+    data = pd.DataFrame(data)
+    data = data.sum()
+    skewval = scipy.stats.skew(data)
+    return [[rawskew.__name__, skewval]]
 
 #####
 #####

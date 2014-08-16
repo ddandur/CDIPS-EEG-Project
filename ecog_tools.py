@@ -147,7 +147,7 @@ def lgammapower(filename):
 def hgammapower(filename):
     return [[hgammapower.__name__,power(filename,70,180)]]
 
-def powerspec (filename):
+def powerspec(filename):
     sample = scipy.io.loadmat(filename)
     #   num_el = number of electrodes
     num_el = len(sample['data'])
@@ -198,6 +198,25 @@ def rawskew(filename):
     data = data.sum()
     skewval = scipy.stats.skew(data)
     return [[rawskew.__name__, skewval]]
+
+# Get the kurtosis of the frequency domain over the 1 second clip.
+def freqkurtosis(filename):
+    data = powerspec(filename)
+    kurtval = scipy.stats.kurtosis(data)
+    return [[freqkurtosis.__name__, kurtval]]
+
+# Get the skew of the frequency domain over the 1 second clip.
+def freqskew(filename):
+    data = powerspec(filename)
+    skewval = scipy.stats.skew(data)
+    return [[freqskew.__name__, skewval]]
+
+# Get the Shannon Entropy of the Peak Frequency Shifting over the 1 second clip.
+# http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3105191/
+def SEPFS(filename, subbands):
+    data = powerspec(filename)
+    
+    
 
 #####
 #####
